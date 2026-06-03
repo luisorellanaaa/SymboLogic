@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SymboLogic | 2026</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Motor Gráfico Canvas 2D (Partículas) -->
+    <canvas id="fx-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+
+    <div class="app-container">
+        <!-- Botón de Tema -->
+        <button class="btn-icon theme-switch" onclick="toggleTheme()" style="position: fixed; top: 20px; left: 20px; z-index: 1000; font-size: 1.5rem; background: var(--surface); backdrop-filter: blur(10px); border-radius: 50%; width: 50px; height: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid var(--surface-border);">
+            🌓
+        </button>
+
+        <!-- Notificaciones -->
+        <div id="notification-container" class="notification-container"></div>
+
+        <!-- Pantalla de Login -->
+        <section id="login-screen" class="glass-panel active">
+            <h1 class="logo-title">Symbo<span>Logic</span></h1>
+            <p class="subtitle">Aprende Conjuntos y Lógica Proposicional</p>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('login')">Ingresar</button>
+                <button class="tab" onclick="switchTab('register')">Registrarse</button>
+            </div>
+
+            <form id="auth-form" onsubmit="handleAuth(event)">
+                <div class="input-group">
+                    <input type="text" id="username" required placeholder="Usuario" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" required placeholder="Contraseña" autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn-primary" id="submit-btn">Entrar</button>
+            </form>
+        </section>
+
+        <!-- Menú Principal (Selección de Dificultad) -->
+        <section id="main-menu" class="glass-panel hidden">
+            <div class="header">
+                <h2>Emergencia UJAP</h2>
+                <div class="stats-header">Operario: <span id="user-display">Jugador</span></div>
+            </div>
+
+            <p style="text-align: center; margin-bottom: 20px; color: var(--text-secondary);">Selecciona la dificultad de la crisis. Un error crítico podría hacer explotar la planta.</p>
+
+            <div class="mode-selection" style="grid-template-columns: repeat(3, 1fr);">
+                <button class="mode-card" onclick="startGame('facil')">
+                    <div class="icon" style="color: #4CAF50;">🟢</div>
+                    <h3 style="font-size: 1.1rem;">Fácil</h3>
+                    <p style="font-size: 0.8rem;">10 Minutos<br>Baja prob. explosión</p>
+                </button>
+                <button class="mode-card" onclick="startGame('medio')">
+                    <div class="icon" style="color: #FFC107;">🟡</div>
+                    <h3 style="font-size: 1.1rem;">Medio</h3>
+                    <p style="font-size: 0.8rem;">5 Minutos<br>Prob. moderada</p>
+                </button>
+                <button class="mode-card" onclick="startGame('dificil')">
+                    <div class="icon" style="color: #F44336;">🔴</div>
+                    <h3 style="font-size: 1.1rem;">Difícil</h3>
+                    <p style="font-size: 0.8rem;">3 Minutos<br>Alta probabilidad</p>
+                </button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-primary" onclick="openManual()">📖 Ver Manual</button>
+                <button class="btn-secondary" onclick="showLeaderboard()">🏆 Récords</button>
+                <button class="btn-outline" onclick="logout()">Cerrar Sesión</button>
+            </div>
+            
+            <button class="btn-primary hidden" id="btn-admin-panel" onclick="showAdminPanel()" style="margin-top: 15px;">Panel de Administración</button>
+        </section>
+
+        <!-- Pantalla de Juego de la Planta Eléctrica -->
+        <section id="power-plant-screen" class="glass-panel hidden" style="border: 2px solid #F44336; box-shadow: 0 0 20px rgba(244, 67, 54, 0.2);">
+            <div class="header" style="background: rgba(244, 67, 54, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(244, 67, 54, 0.3);">
+                <div style="font-weight: 800; font-size: 2.5rem; color: #F44336; font-family: monospace; letter-spacing: 2px; text-shadow: 0 0 10px #F44336;" id="bomb-timer">10:00</div>
+                <div class="stats-header" style="color: #F44336; font-weight: bold;">Estado: <span id="plant-status">Crítico</span></div>
+            </div>
+
+            <p style="text-align: center; margin-top: 15px; font-weight: bold; color: var(--text-primary); font-size: 1.1rem;">¡Resuelve los 3 módulos para restaurar la energía!</p>
+
+            <div class="modules-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                <!-- Modulo 1: Cables -->
+                <div class="mode-card module-card" id="module-1" onclick="openModule(1)" style="cursor: pointer; position: relative;">
+                    <div class="status-led" id="led-1" style="width: 20px; height: 20px; border-radius: 50%; background: #F44336; position: absolute; top: 15px; right: 15px; box-shadow: 0 0 10px #F44336;"></div>
+                    <div class="icon">🔌</div>
+                    <h3>Cables Lógicos</h3>
+                    <p>Lógica Proposicional</p>
+                </div>
+
+                <!-- Modulo 2: Válvulas -->
+                <div class="mode-card module-card" id="module-2" onclick="openModule(2)" style="cursor: pointer; position: relative;">
+                    <div class="status-led" id="led-2" style="width: 20px; height: 20px; border-radius: 50%; background: #F44336; position: absolute; top: 15px; right: 15px; box-shadow: 0 0 10px #F44336;"></div>
+                    <div class="icon">🚰</div>
+                    <h3>Válvulas</h3>
+                    <p>Teoría de Conjuntos</p>
+                </div>
+
+                <!-- Modulo 3: Teclado -->
+                <div class="mode-card module-card" id="module-3" onclick="openModule(3)" style="cursor: pointer; position: relative;">
+                    <div class="status-led" id="led-3" style="width: 20px; height: 20px; border-radius: 50%; background: #F44336; position: absolute; top: 15px; right: 15px; box-shadow: 0 0 10px #F44336;"></div>
+                    <div class="icon">🔢</div>
+                    <h3>Panel De Morgan</h3>
+                    <p>Equivalencias Lógicas</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn-primary" onclick="openManual()">📖 Abrir Manual</button>
+                <button class="btn-icon" onclick="abortGame()" style="color: var(--error); font-weight: bold;">✖ Abortar Misión</button>
+            </div>
+        </section>
+
+        <!-- Modal para Módulos -->
+        <div id="module-modal" class="glass-panel hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 600px; max-height: 80vh; z-index: 2000; background: var(--surface); box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid var(--surface-border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 15px; margin-bottom: 20px;">
+                <h2 id="modal-title" style="margin: 0;">Módulo</h2>
+                <button class="btn-icon" onclick="closeModule()" style="font-size: 1.5rem; width: 40px; height: 40px;">✖</button>
+            </div>
+            <div id="modal-content" style="overflow-y: auto; text-align: center;">
+                <!-- Contenido dinámico del módulo -->
+            </div>
+        </div>
+
+        <!-- Pantalla de Fin de Juego -->
+        <section id="end-screen" class="glass-panel hidden" style="text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 300px;">
+            <h1 id="end-title" style="font-size: 3.5rem; margin-bottom: 15px; font-weight: 800; text-transform: uppercase;">¡EXPLOSIÓN!</h1>
+            <p id="end-message" style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 30px; max-width: 400px;">La UJAP se ha quedado sin energía. Todos los servidores han colapsado.</p>
+            <button class="btn-primary" onclick="switchPanel('main-menu')" style="font-size: 1.1rem; padding: 12px 30px;">Volver al Inicio</button>
+        </section>
+
+        <!-- Manual Overlay -->
+        <div id="manual-overlay" class="hidden" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 3000; padding: 20px; overflow-y: auto; backdrop-filter: blur(5px);">
+            <div style="background: #fdfdfd; color: #111; max-width: 800px; margin: 0 auto; padding: 40px; border-radius: 8px; font-family: 'Times New Roman', serif; box-shadow: 0 10px 50px rgba(0,0,0,0.5);">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #b71c1c; padding-bottom: 15px; margin-bottom: 30px;">
+                    <div>
+                        <h1 style="margin: 0; font-size: 2rem; color: #b71c1c; text-transform: uppercase;">Manual de Emergencia</h1>
+                        <h2 style="margin: 5px 0 0 0; font-size: 1.2rem; color: #555;">Planta Eléctrica UJAP</h2>
+                    </div>
+                    <button onclick="closeManual()" style="background: #b71c1c; color: white; border: none; padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">CERRAR</button>
+                </div>
+                <div id="manual-content" style="line-height: 1.6; font-size: 1.1rem;">
+                    <h3>Sección 1: Protocolo de Cables Lógicos</h3>
+                    <p>Si se presenta un fallo en el sistema de cableado, debes analizar el ESTADO DEL SERVIDOR (Variables P y Q) y cortar el cable correspondiente:</p>
+                    <ul style="margin-left: 20px; margin-bottom: 20px;">
+                        <li><strong>Si P y Q son VERDADEROS:</strong> Corta el cable <strong>ROJO</strong>.</li>
+                        <li><strong>Si P es FALSO y Q es VERDADERO:</strong> Corta el cable <strong>AZUL</strong>.</li>
+                        <li><strong>Si P es VERDADERO y Q es FALSO:</strong> Corta el cable <strong>VERDE</strong>.</li>
+                        <li><strong>Si AMBAS son FALSAS:</strong> Corta el cable <strong>AMARILLO</strong>.</li>
+                    </ul>
+
+                    <h3>Sección 2: Válvulas de Teoría de Conjuntos</h3>
+                    <p>Las presiones de la planta se regulan mediante válvulas de conjuntos. Lee la "Área de Presión" en la pantalla y gira la válvula que corresponda a esa definición matemática:</p>
+                    <ul style="margin-left: 20px; margin-bottom: 20px;">
+                        <li><strong>Elementos de A que NO están en B:</strong> Gira la válvula <strong>A - B</strong> (Diferencia).</li>
+                        <li><strong>Todos los elementos combinados:</strong> Gira la válvula <strong>A ∪ B</strong> (Unión).</li>
+                        <li><strong>Solo elementos compartidos por ambos:</strong> Gira la válvula <strong>A ∩ B</strong> (Intersección).</li>
+                    </ul>
+
+                    <h3>Sección 3: Bypass de Seguridad (Leyes de De Morgan)</h3>
+                    <p>Si el sistema muestra un ERROR cifrado, debes introducir su EQUIVALENCIA LÓGICA exacta para bypassear la seguridad:</p>
+                    <ul style="margin-left: 20px; margin-bottom: 20px;">
+                        <li>Si el error es <strong>¬(P ∧ Q)</strong> ➔ Presiona: <strong>¬P ∨ ¬Q</strong></li>
+                        <li>Si el error es <strong>¬(P ∨ Q)</strong> ➔ Presiona: <strong>¬P ∧ ¬Q</strong></li>
+                        <li>Si el error es <strong>P → Q</strong> ➔ Presiona: <strong>¬P ∨ Q</strong></li>
+                    </ul>
+                    
+                    <p style="color: red; font-weight: bold; text-align: center; border: 1px solid red; padding: 10px; margin-top: 30px;">¡CUIDADO! INTRODUCIR UN DATO ERRÓNEO PUEDE CAUSAR UNA EXPLOSIÓN INMINENTE (10% - 70% DE PROBABILIDAD SEGÚN LA GRAVEDAD DE LA CRISIS).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Clasificación -->
+        <section id="leaderboard-screen" class="glass-panel hidden">
+            <h2 style="margin-bottom: 20px;">🏆 Tiempos Récord (Supervivientes)</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">Solo los ingenieros más rápidos en salvar la UJAP.</p>
+            <div class="leaderboard-list" id="leaderboard-list-tiempos" style="max-height: 400px; overflow-y: auto;"></div>
+            <button class="btn-secondary" style="margin-top: 25px; width: 100%;" onclick="hideLeaderboard()">Volver al Menú</button>
+        </section>
+
+        <!-- Panel de Administración -->
+        <section id="admin-panel" class="glass-panel hidden" style="max-width: 800px; width: 95%;">
+            <div class="header" style="margin-bottom: 20px;">
+                <button class="btn-icon" onclick="switchPanel('main-menu')">← Volver</button>
+                <h2>Admin Panel</h2>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchAdminTab('admin-leaderboard')">Mejores Tiempos</button>
+                <button class="tab" onclick="switchAdminTab('admin-usuarios')">Usuarios Registrados</button>
+            </div>
+
+            <!-- Editor de Puntuaciones -->
+            <div id="admin-leaderboard" class="admin-tab-content">
+                <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 0.9rem;">Elimina jugadores que hayan hecho trampa.</p>
+                <div class="leaderboard-list" id="admin-list-scores" style="max-height: 350px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- Editor de Usuarios -->
+            <div id="admin-usuarios" class="admin-tab-content hidden">
+                <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 0.9rem;">Administra los roles y cuentas de los usuarios registrados.</p>
+                <div class="leaderboard-list" id="admin-list-users" style="max-height: 350px; overflow-y: auto;"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

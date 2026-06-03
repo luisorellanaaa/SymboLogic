@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SymboLogic | 2026</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Botón de Tema -->
+        <button class="btn-icon theme-switch" onclick="toggleTheme()" style="position: fixed; top: 20px; left: 20px; z-index: 1000; font-size: 1.5rem; background: var(--surface); backdrop-filter: blur(10px); border-radius: 50%; width: 50px; height: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid var(--surface-border);">
+            🌓
+        </button>
+
+        <!-- Notificaciones -->
+        <div id="notification-container" class="notification-container"></div>
+
+        <!-- Pantalla de Login -->
+        <section id="login-screen" class="glass-panel active">
+            <h1 class="logo-title">Symbo<span>Logic</span></h1>
+            <p class="subtitle">Aprende Conjuntos y Lógica Proposicional</p>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('login')">Ingresar</button>
+                <button class="tab" onclick="switchTab('register')">Registrarse</button>
+            </div>
+
+            <form id="auth-form" onsubmit="handleAuth(event)">
+                <div class="input-group">
+                    <input type="text" id="username" required placeholder="Usuario" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" required placeholder="Contraseña" autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn-primary" id="submit-btn">Entrar</button>
+            </form>
+        </section>
+
+        <!-- Menú Principal -->
+        <section id="main-menu" class="glass-panel hidden">
+            <div class="header">
+                <h2>Bienvenido, <span id="user-display">Jugador</span></h2>
+                <div style="display: flex; gap: 15px;">
+                    <div class="stats-header">Puntos: <span id="points-display">0</span></div>
+                    <div class="stats-header" style="color: #FFD700;">Monedas: <span id="coins-display">0</span> 🪙</div>
+                </div>
+            </div>
+
+            <div class="mode-selection">
+                <button class="mode-card" onclick="startGame('conjuntos')">
+                    <div class="icon">∪</div>
+                    <h3>Conjuntos</h3>
+                    <p>Uniones, intersecciones y diagramas</p>
+                </button>
+                <button class="mode-card" onclick="startGame('logica')">
+                    <div class="icon">∧</div>
+                    <h3>Lógica Proposicional</h3>
+                    <p>Tablas de verdad y equivalencias</p>
+                </button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-secondary" onclick="showLeaderboard()">Ver Clasificación</button>
+                <button class="btn-outline" onclick="logout()">Cerrar Sesión</button>
+            </div>
+            
+            <button class="btn-primary hidden" id="btn-admin-panel" onclick="showAdminPanel()" style="margin-top: 15px;">Panel de Administración</button>
+        </section>
+
+        <!-- Pantalla de Juego -->
+        <section id="game-screen" class="glass-panel hidden">
+            <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn-icon" onclick="exitGame()">← Volver</button>
+                <div class="timer">Tiempo: <span id="time-display">60</span>s</div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="stats-header">Score: <span id="current-score">0</span></div>
+                    <div class="stats-header" style="color: #FFD700;">Monedas: <span id="game-coins-display">0</span> 🪙</div>
+                </div>
+            </div>
+
+            <div id="game-content" class="game-content">
+                <!-- El contenido se genera dinámicamente -->
+            </div>
+
+            <div class="controls" id="game-controls">
+                <!-- Botones de respuesta -->
+            </div>
+
+            <div class="powerups-container" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap;">
+                <button id="btn-power-5050" class="btn-secondary" onclick="usePower('5050')" style="background-color: rgba(255, 215, 0, 0.1); border-color: #FFD700; color: #FFD700; padding: 8px 15px; font-size: 0.9rem;">
+                    50/50 (2 🪙)
+                </button>
+                <button id="btn-power-time" class="btn-secondary" onclick="usePower('time')" style="background-color: rgba(0, 191, 255, 0.1); border-color: #00BFFF; color: #00BFFF; padding: 8px 15px; font-size: 0.9rem;">
+                    +15s (1 🪙)
+                </button>
+                <button id="btn-power-skip" class="btn-secondary" onclick="usePower('skip')" style="background-color: rgba(255, 69, 0, 0.1); border-color: #FF4500; color: #FF4500; padding: 8px 15px; font-size: 0.9rem;">
+                    Saltar (3 🪙)
+                </button>
+            </div>
+        </section>
+
+        <!-- Pantalla de Clasificación -->
+        <section id="leaderboard-screen" class="glass-panel hidden">
+            <h2 style="margin-bottom: 20px;">🏆 Clasificación</h2>
+            
+            <h3 style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 10px;">Teoría de Conjuntos</h3>
+            <div class="leaderboard-list" id="leaderboard-list-conjuntos" style="margin-bottom: 25px;"></div>
+
+            <h3 style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 10px;">Lógica Proposicional</h3>
+            <div class="leaderboard-list" id="leaderboard-list-logica"></div>
+
+            <button class="btn-secondary" style="margin-top: 25px; width: 100%;" onclick="hideLeaderboard()">Volver al Menú</button>
+        </section>
+
+        <!-- Panel de Administración -->
+        <section id="admin-panel" class="glass-panel hidden" style="max-width: 800px; width: 95%;">
+            <div class="header" style="margin-bottom: 20px;">
+                <button class="btn-icon" onclick="switchPanel('main-menu')">← Volver</button>
+                <h2>Admin Panel</h2>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchAdminTab('preguntas-conjuntos')">Conjuntos</button>
+                <button class="tab" onclick="switchAdminTab('preguntas-logica')">Lógica</button>
+                <button class="tab" onclick="switchAdminTab('admin-leaderboard')">Puntuaciones</button>
+                <button class="tab" onclick="switchAdminTab('admin-usuarios')">Usuarios</button>
+            </div>
+
+            <!-- Editor de Preguntas (Conjuntos) -->
+            <div id="admin-preguntas-conjuntos" class="admin-tab-content">
+                <div class="leaderboard-list" id="admin-list-conjuntos" style="max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
+                <h3 style="font-size: 1rem; margin-bottom: 10px;">Añadir Nueva Pregunta</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <input type="text" id="new-q-conjuntos" placeholder="Enunciado de la pregunta">
+                    <input type="text" id="new-q-conjuntos-opt0" placeholder="Opción 0">
+                    <input type="text" id="new-q-conjuntos-opt1" placeholder="Opción 1">
+                    <input type="text" id="new-q-conjuntos-opt2" placeholder="Opción 2">
+                    <input type="text" id="new-q-conjuntos-opt3" placeholder="Opción 3">
+                    <input type="number" id="new-q-conjuntos-ans" placeholder="Índice de la respuesta correcta (0, 1, 2, o 3)" min="0" max="3">
+                    <button class="btn-primary" onclick="addQuestion('conjuntos')">Añadir Pregunta</button>
+                </div>
+            </div>
+
+            <!-- Editor de Preguntas (Lógica) -->
+            <div id="admin-preguntas-logica" class="admin-tab-content hidden">
+                <div class="leaderboard-list" id="admin-list-logica" style="max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
+                <h3 style="font-size: 1rem; margin-bottom: 10px;">Añadir Nueva Pregunta</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <input type="text" id="new-q-logica" placeholder="Enunciado de la pregunta">
+                    <input type="text" id="new-q-logica-opt0" placeholder="Opción 0">
+                    <input type="text" id="new-q-logica-opt1" placeholder="Opción 1">
+                    <input type="text" id="new-q-logica-opt2" placeholder="Opción 2">
+                    <input type="text" id="new-q-logica-opt3" placeholder="Opción 3">
+                    <input type="number" id="new-q-logica-ans" placeholder="Índice de la respuesta correcta (0, 1, 2, o 3)" min="0" max="3">
+                    <button class="btn-primary" onclick="addQuestion('logica')">Añadir Pregunta</button>
+                </div>
+            </div>
+
+            <!-- Editor de Puntuaciones -->
+            <div id="admin-leaderboard" class="admin-tab-content hidden">
+                <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 0.9rem;">Elimina jugadores que hayan hecho trampa.</p>
+                <div class="leaderboard-list" id="admin-list-scores" style="max-height: 350px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- Editor de Usuarios -->
+            <div id="admin-usuarios" class="admin-tab-content hidden">
+                <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 0.9rem;">Administra los roles y cuentas de los usuarios registrados.</p>
+                <div class="leaderboard-list" id="admin-list-users" style="max-height: 350px; overflow-y: auto;"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
