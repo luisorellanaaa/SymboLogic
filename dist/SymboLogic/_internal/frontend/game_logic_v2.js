@@ -551,6 +551,15 @@ const usePower = (type) => {
     updateCoinsUI();
 };
 
+// --- Manual del Juego ---
+const showManual = () => {
+    document.getElementById('manual-modal').classList.remove('hidden');
+};
+
+const closeManual = () => {
+    document.getElementById('manual-modal').classList.add('hidden');
+};
+
 // --- Guardado de Puntaje Local ---
 const saveScoreOffline = (mode, points) => {
     if (!points) return;

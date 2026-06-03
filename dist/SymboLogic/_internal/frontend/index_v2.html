@@ -19,6 +19,47 @@
             🌓
         </button>
 
+        <!-- Botón de Manual (Ayuda) -->
+        <button class="btn-icon" onclick="showManual()" style="position: fixed; top: 20px; right: 20px; z-index: 1000; font-size: 1.5rem; background: var(--surface); backdrop-filter: blur(10px); border-radius: 50%; width: 50px; height: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid var(--surface-border); font-weight: bold; color: var(--text-primary);">
+            ?
+        </button>
+
+        <!-- Manual del Juego (Modal) -->
+        <div id="manual-modal" class="glass-panel hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto;">
+            <div class="header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 15px; margin-bottom: 15px;">
+                <h2 style="margin: 0;">📖 Manual de Juego</h2>
+                <button class="btn-icon" onclick="closeManual()" style="font-size: 1.2rem; cursor: pointer;">✖</button>
+            </div>
+            
+            <div class="manual-content" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-primary);">
+                <h3 style="color: var(--primary); margin-top: 0;">🎯 Modos de Juego</h3>
+                <ul style="padding-left: 20px; margin-bottom: 20px;">
+                    <li><b>Estándar:</b> Responde correctamente antes de que el tiempo (60s) termine.</li>
+                    <li><b>Supervivencia:</b> Inicias con 15s. Respuestas correctas suman 3s; incorrectas restan 2s.</li>
+                    <li><b>Muerte Súbita:</b> Tienes 3 vidas (❤️). Juega a tu ritmo pero al tercer error, pierdes.</li>
+                    <li><b>Práctica:</b> Tiempo infinito y sin castigos. No ganarás monedas ni puntaje.</li>
+                </ul>
+
+                <h3 style="color: var(--primary);">✨ Economía y Poderes</h3>
+                <p>Al acertar ganarás <b>1 moneda</b> (y 10 puntos). Puedes usar estas monedas durante la partida:</p>
+                <ul style="padding-left: 20px; margin-bottom: 20px;">
+                    <li><b>50/50 (Costo: 2):</b> Elimina dos opciones incorrectas al instante.</li>
+                    <li><b>+15s (Costo: 1):</b> Te otorga 15 segundos extra. Máximo 3 veces por partida.</li>
+                    <li><b>Saltar (Costo: 3):</b> Pasa a la siguiente pregunta sin penalizaciones.</li>
+                </ul>
+
+                <h3 style="color: var(--primary);">📚 Temas y Preguntas</h3>
+                <p>El juego evalúa tus conocimientos en Matemáticas Discretas:</p>
+                <ul style="padding-left: 20px; margin-bottom: 20px;">
+                    <li><b>Conjuntos:</b> Deberás identificar uniones (∪), intersecciones (∩), diferencias (-) y complementos, interpretando notación matemática e identificando sus aplicaciones.</li>
+                    <li><b>Lógica Proposicional:</b> Te enfrentarás a conjunciones (∧), disyunciones (∨), implicaciones (→) y equivalencias, evaluando tablas de verdad y leyes de simplificación.</li>
+                </ul>
+
+                <h3 style="color: var(--primary);">🧩 Rompecabezas</h3>
+                <p>Consigue más de 50 puntos en cualquier modo (excepto Práctica) para desbloquear las 9 piezas ocultas de la Planta Eléctrica de nuestra universidad.</p>
+            </div>
+        </div>
+
         <!-- Notificaciones -->
         <div id="notification-container" class="notification-container"></div>
 
