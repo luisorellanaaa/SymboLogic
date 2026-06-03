@@ -554,9 +554,11 @@ const usePower = (type) => {
 // --- Manual del Juego ---
 const showManual = () => {
     document.getElementById('manual-modal').classList.remove('hidden');
+    document.getElementById('manual-modal').classList.add('active');
 };
 
 const closeManual = () => {
+    document.getElementById('manual-modal').classList.remove('active');
     document.getElementById('manual-modal').classList.add('hidden');
 };
 
